@@ -12,6 +12,7 @@ public class SettingsPanel : MonoBehaviour
     private void Awake()
     {
         gameVolumeSlider.onValueChanged.AddListener(v => SettingsData.GameVolume = v);
+
         uiVolumeSlider.onValueChanged.AddListener(v => SettingsData.UiVolume = v);
         sensitivitySlider.onValueChanged.AddListener(v => SettingsData.Sensitivity = v);
     }

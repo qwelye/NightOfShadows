@@ -1,3 +1,4 @@
+// анимация наведения и заливки кнопок меню
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;

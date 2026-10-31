@@ -1,6 +1,6 @@
+//  главный синглтон состояния игры
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,27 +19,44 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            SetState(State == GameState.Playing ? GameState.Paused : GameState.Playing);
+        if (State == GameState.Won || State == GameState.Lost) return;
+
+        if (GameInput.Instance != null && GameInput.Instance.Player.Pause.WasPressedThisFrame())
+        {
+            if (State == GameState.Playing) SetState(GameState.Paused);
+            else if (State == GameState.Paused) SetState(GameState.Playing);
+        }
     }
 
     public void SetState(GameState newState)
     {
-        State = newState;
-        bool paused = newState == GameState.Paused;
+        // Защита от смены состояния после финала
+        if ((State == GameState.Won || State == GameState.Lost) && newState != GameState.Won && newState != GameState.Lost)
+            return;
 
-        Time.timeScale = paused ? 0f : 1f;
-        Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
-        Cursor.visible = paused;
+        State = newState;
+
+        bool inGame = newState == GameState.Playing;
+
+        Time.timeScale = inGame ? 1f : 0f;
+        AudioListener.pause = !inGame;
+        Cursor.lockState = inGame ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !inGame;
 
         OnStateChanged?.Invoke(newState);
     }
 
     public void Resume() => SetState(GameState.Playing);
 
+    // Сброс окружения
     private void OnDestroy()
     {
         if (Instance == this) Instance = null;
         Time.timeScale = 1f;
+        AudioListener.pause = false;
+
+        ShadowAggro.ActiveChasers.Clear();
+        ScanTarget.Targets.Clear();
+        AnomalyEntity.All.Clear();
     }
 }

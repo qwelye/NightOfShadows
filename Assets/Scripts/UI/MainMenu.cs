@@ -1,3 +1,4 @@
+//  логика главного меню
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
